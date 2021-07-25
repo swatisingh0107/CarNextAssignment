@@ -1,0 +1,21 @@
+before_script:
+  - apk update -qq
+  - apk add -qq git
+  # Setup SSH deploy keys
+  - 'which ssh-agent || ( apk add -qq openssh-client )'
+  - eval $(ssh-agent -s)
+  #- ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 --decode)
+  - echo "${EC2CARNEXT}" | ssh-add -
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+deploy_development:
+  type: deploy
+  environment:
+    name: development
+    url: "ec2-3-21-159-232.us-east-2.compute.amazonaws.com"
+  script:
+      - ssh ubuntu@ec2-3-21-159-232.us-east-2.compute.amazonaws.com "cd /opt/dev-airflow/dags && echo "Current directory `pwd`" && git checkout -B develop && git pull origin main && chown -R airflow:hdfs /opt/dev-airflow/dags && exit"
+  only:
+      - main
+
