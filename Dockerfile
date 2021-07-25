@@ -21,7 +21,7 @@ RUN sed -i 's|'$(cat curr_version.tmp)'/main|'$ALPINE_OLD_VERSION'/main|' \
 RUN pip3 install --upgrade pip
 
 # Installing IPython
-RUN pip install ipython
+#RUN pip install ipython
 
 # GENERAL DEPENDENCIES
 
@@ -40,12 +40,12 @@ RUN curl -sL --retry 3 \
     | gunzip \
     | tar -x -C /usr/ && \
     rm -rf $HADOOP_HOME/share/doc
-#raw datalake
-    hadoop fs -mkdir -p /user/swati.singh/carnext-data-engineering-assignment/raw
-#cleansed
-    hadoop fs -mkdir -p /user/swati.singh/carnext-data-engineering-assignment/cleansed
-#curated
-    hadoop fs -mkdir -p /user/swati.singh/carnext-data-engineering-assignment/curated
+##raw datalake
+#    hadoop fs -mkdir -p /user/swati.singh/carnext-data-engineering-assignment/raw
+##cleansed
+#    hadoop fs -mkdir -p /user/swati.singh/carnext-data-engineering-assignment/cleansed
+##curated
+#    hadoop fs -mkdir -p /user/swati.singh/carnext-data-engineering-assignment/curated
 
 # SPARK
 
@@ -53,7 +53,7 @@ ENV SPARK_VERSION 2.0.0
 ENV SPARK_PACKAGE spark-$SPARK_VERSION-bin-without-hadoop
 ENV SPARK_HOME /usr/spark-$SPARK_VERSION
 ENV PYSPARK_PYTHON python3
-ENV PYSPARK_DRIVER_PYTHON ipython
+ENV PYSPARK_DRIVER_PYTHON python3
 ENV SPARK_DIST_CLASSPATH="$HADOOP_HOME/etc/hadoop/*:$HADOOP_HOME/share/hadoop/common/lib/*:$HADOOP_HOME/share/hadoop/common/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/hdfs/lib/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/yarn/lib/*:$HADOOP_HOME/share/hadoop/yarn/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*:$HADOOP_HOME/share/hadoop/mapreduce/*:$HADOOP_HOME/share/hadoop/tools/lib/*"
 ENV PATH $PATH:$SPARK_HOME/bin
 RUN curl -sL --retry 3 \
