@@ -15,7 +15,7 @@ deploy_development:
     name: development
     url: "ec2-3-21-159-232.us-east-2.compute.amazonaws.com"
   script:
-      - ssh ubuntu@ec2-3-21-159-232.us-east-2.compute.amazonaws.com "cd /opt/dev-airflow/dags && echo "Current directory `pwd`" && git checkout -B develop && git pull origin main && chown -R airflow:hdfs /opt/dev-airflow/dags && exit"
+      - ssh ubuntu@ec2-3-21-159-232.us-east-2.compute.amazonaws.com "cd images/dags && echo "Current directory `pwd`" && git checkout -B main && git pull origin main && chown -R ubuntu:hdfs /images/dags && exit"
   only:
       - main
 

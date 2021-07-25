@@ -47,16 +47,14 @@ FLOW_END = DummyOperator(
         trigger_rule=TriggerRule.ONE_SUCCESS,
         dag=dag)
 
-cmd = "ssh -o StrictHostKeyChecking=no -i /keys/emr.pem ec2-user@spar-ds-emr.ygroup.cloud " \
-      "'cd spar && git pull' "
+cmd = "sudo docker build ."
 
 GET_CODE = BashOperator(
-    task_id="GET_CODE",
+    task_id="ENV_SETUP",
     bash_command=cmd,
     dag=dag)
 
-cmd = "ssh -o StrictHostKeyChecking=no -i /keys/emr.pem ec2-user@spar-ds-emr.ygroup.cloud " \
-      "'python3.6 spar/notebooks/Dashboarding/create_output.py' "
+cmd = "python /usr/local/airflow/dags/CarNextAssignment/data_pipeline.py"
 
 RUN_JOB = BashOperator(
     task_id="RUN_JOB",
@@ -64,4 +62,3 @@ RUN_JOB = BashOperator(
     dag=dag)
 
 FLOW_START >> GET_CODE >> RUN_JOB >> FLOW_END
-

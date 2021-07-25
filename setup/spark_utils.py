@@ -7,7 +7,7 @@ def get_spark_app_config():
     spark_conf=SparkConf()
     config=configparser.ConfigParser()
 
-    config.read(os.path.abspath("spark.conf"))
+    config.read(os.path.abspath("setup/spark.conf"))
     config.read(CONFIG_PATH)
     print(CONFIG_PATH)
 
