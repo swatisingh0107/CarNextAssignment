@@ -47,7 +47,8 @@ FLOW_END = DummyOperator(
         trigger_rule=TriggerRule.ONE_SUCCESS,
         dag=dag)
 
-cmd = "sudo docker build ."
+cmd = "cd /usr/local/airflow/dags/CarNextAssignment" \
+      "sudo docker build ."
 
 GET_CODE = BashOperator(
     task_id="ENV_SETUP",
