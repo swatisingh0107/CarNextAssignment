@@ -50,7 +50,7 @@ FLOW_END = DummyOperator(
 cmd = "cd /usr/local/airflow/dags/CarNextAssignment" \
       "sudo docker build ."
 
-GET_CODE = BashOperator(
+ENV_SETUP = BashOperator(
     task_id="ENV_SETUP",
     bash_command=cmd,
     dag=dag)
@@ -62,4 +62,4 @@ RUN_JOB = BashOperator(
     bash_command=cmd,
     dag=dag)
 
-FLOW_START >> GET_CODE >> RUN_JOB >> FLOW_END
+FLOW_START >> ENV_SETUP >> RUN_JOB >> FLOW_END
