@@ -31,7 +31,7 @@ dag = DAG(
     dag_id=DAG_ID,
     default_args=DAG_ARGS,
     description=DAG_DESCRIPTION,
-    schedule_interval='* * * * 5',
+    schedule_interval='30 9 * * *',
     concurrency=1,
     max_active_runs=1,
     catchup=False
@@ -53,11 +53,25 @@ RUN_TESTS = BashOperator(
     bash_command=cmd,
     dag=dag)
 
-cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/make_model_avg_damage_pipeline.py"
+cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/make_model_avg_damage_pipeline.py get_data"
 
-PROCESS_DF = BashOperator(
-    task_id="RUN_JOB",
+GET_DATA = BashOperator(
+    task_id="GET_DATA",
     bash_command=cmd,
     dag=dag)
 
-FLOW_START >> RUN_TESTS>>PROCESS_DF >> FLOW_END
+cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/make_model_avg_damage_pipeline.py clean_data"
+
+CLEAN_DATA = BashOperator(
+    task_id="CLEAN_DATA",
+    bash_command=cmd,
+    dag=dag)
+
+cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/make_model_avg_damage_pipeline.py write_data"
+
+WRITE_DATA = BashOperator(
+    task_id="WRITE_DATA",
+    bash_command=cmd,
+    dag=dag)
+
+FLOW_START >> RUN_TESTS>>GET_DATA>>CLEAN_DATA>>WRITE_DATA >> FLOW_END

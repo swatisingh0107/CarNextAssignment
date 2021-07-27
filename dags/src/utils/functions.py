@@ -97,6 +97,13 @@ def calulate_avg_damage(spark,df,curated_path=''):
     # print('Wrote to S3 bucket')
 
 
-# def write_to_db(df):
+def write_to_db(result):
+    connectionProperties = {
+    "user" : 'admin',
+    "password" : 'AKIA5IZR22OOTKYBL7HM',
+    "driver": 'com.mysql.jdbc.Driver'}
+    result.write.jdbc(url='jdbc:mysql://carnext.c7wgsmxotnws.us-east-2.rds.amazonaws.com:3306',
+          table='make_model_damage',properties=connectionProperties,mode='overwrite')
+
 
 
