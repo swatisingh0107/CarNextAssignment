@@ -5,7 +5,7 @@ RAW_TESTDATA = spark.createDataFrame([(1, 2, 3),(2,3,None),(4, 5, 6), (7, 8, 9),
 
 def test_deduplicate_data():
     try:
-        deduplicate_data(spark,RAW_TESTDATA).count()==3
+        deduplicate_data(spark,RAW_TESTDATA).count()==4
         print('De-duplicate unit tests passed')
     except:
         raise
