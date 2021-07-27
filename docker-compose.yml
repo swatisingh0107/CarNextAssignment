@@ -1,0 +1,41 @@
+version: '3.7'
+services:
+# create postgres container
+  postgres:
+    image: postgres:9.6
+    container_name: postgres_container
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+
+  airflow:
+  # create airflow container
+    build: './Docker/'# construct the container along the Dockerfile in this folder
+    container_name: airflow_container
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+    volumes:
+      # mount the following local folders
+      - ./dags:/usr/local/airflow/dags
+      - ./data:/usr/local/airflow/data
+      - ./Docker/requirements.txt:/usr/local/airflow/requirements.txt
+    ports:
+      - "8080:8080"# expose port
+    command: webserver
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+#zookeeper:
+## create zookeeper container
+#  image: wurstmeister/zookeeper
+#  container_name: zookeeper_container
+#  ports:
+#    - "2181:2181"# expose port

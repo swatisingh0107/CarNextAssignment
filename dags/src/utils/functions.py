@@ -1,11 +1,15 @@
 import errno
-from pyspark.sql.functions import input_file_name
-import pyspark.sql.functions as F
-from setup.spark_utils import get_spark_session
-from pyspark.sql import Window
-import wget
 import os
 import subprocess
+
+# from pyspark.sql.functions import input_file_name
+import pyspark.sql.functions as F
+from pyspark.sql.types import StringType
+import wget
+from pyspark.sql import Window
+
+from src.utils.spark_utils import get_aws_spark_session
+
 
 def run_cmd(args_list):
     """
@@ -18,7 +22,6 @@ def run_cmd(args_list):
     s_return =  proc.returncode
     return s_return, s_output, s_err
 
-spark=get_spark_session('processing')
 
 def get_data_csv(path,output_dir,hadoop_dir):
     #This function is to download the .gz compressed file from given url and decompress it
@@ -43,8 +46,7 @@ def get_data_csv(path,output_dir,hadoop_dir):
     except Exception as error:
         print('File path not found:'+filename)
 
-def deduplicate_data(spark,df,header):
-    # df=spark.read.csv(path,header=header,sep=',',multiLine=True)
+def deduplicate_data(spark,df):
     df_count=df.count()
     print("Read {0} records".format(df.count()))
     df_deduplicated=df.dropDuplicates()
@@ -60,16 +62,41 @@ def clean_records_with_nulls(spark,null_threshhold,df):
     df=df.filter(df.numNulls<=null_threshhold)
     return df
 
+
+
+
 def write_df_to_paruqet(df,write_path):
-    df=df.withColumn('filename',input_file_name())
-    df.partitionBy('filename').parquet(write_path)
+    df.repartition(1).write.parquet(write_path, mode='overwrite')
+    print('Wrote to cleansed bucket')
+
+def clean_strings(df,cols):
+
+    def remove_extra_whitespaces(str1):
+        if str1 is not None:
+            str1=str1.strip()
+            return "".join(str1.split(' '))
+        else:
+            return str1
+
+
+    convertUDF = F.udf(lambda z: remove_extra_whitespaces(z), StringType())
+    for col in cols:
+        df=df.withColumn(col,F.lower(convertUDF(F.col(col))))
 
 
 
-def calulate_avg_damage(spark,read_parquet_path,year:str,curated_path):
-    df=spark.read.parquet(read_parquet_path)
+    return df
+
+def calulate_avg_damage(spark,df,curated_path=''):
     window=Window.partitionBy('country').orderBy(F.desc('avg_amount_damage'))
-    df=df.filter(df.build_year==year).groupBy(df.build_year,df.country,df.make,df.model).agg(F.avg(df.amount_damage).alias('avg_amount_damage'))
-    df = df.select(F.col('*'), F.row_number().over(window).alias('row_number')).where(F.col('row_number') <= 10) .show()
-    df.repartition(1).write.parquet(curated_path+'/'+year)
+    df=df.groupBy(df.build_year,df.country,df.make,df.model).agg(F.avg(df.amount_damage).alias('avg_amount_damage'))
+    # df = df.select(F.col('*'), F.row_number().over(window).alias('row_number')).where(F.col('row_number') <= 10)
+    df.printSchema()
+    return df
+    # df.repartition(1).write.parquet(curated_path, mode='overwrite')
+    # print('Wrote to S3 bucket')
+
+
+# def write_to_db(df):
+
 

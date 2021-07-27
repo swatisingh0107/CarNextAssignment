@@ -31,7 +31,7 @@ dag = DAG(
     dag_id=DAG_ID,
     default_args=DAG_ARGS,
     description=DAG_DESCRIPTION,
-    schedule_interval='14 20 * * *',
+    schedule_interval='* * * * 5',
     concurrency=1,
     max_active_runs=1,
     catchup=False
@@ -47,19 +47,17 @@ FLOW_END = DummyOperator(
         trigger_rule=TriggerRule.ONE_SUCCESS,
         dag=dag)
 
-cmd = "cd /usr/local/airflow/dags/CarNextAssignment" \
-      "sudo docker build ."
-
-ENV_SETUP = BashOperator(
-    task_id="ENV_SETUP",
+cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/tests/test_functions.py"
+RUN_TESTS = BashOperator(
+    task_id="RUN_TESTS",
     bash_command=cmd,
     dag=dag)
 
-cmd = "python /usr/local/airflow/dags/CarNextAssignment/data_pipeline.py"
+cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/make_model_avg_damage_pipeline.py"
 
-RUN_JOB = BashOperator(
+PROCESS_DF = BashOperator(
     task_id="RUN_JOB",
     bash_command=cmd,
     dag=dag)
 
-FLOW_START >> ENV_SETUP >> RUN_JOB >> FLOW_END
+FLOW_START >> RUN_TESTS>>PROCESS_DF >> FLOW_END
