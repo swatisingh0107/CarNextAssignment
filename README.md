@@ -43,22 +43,32 @@ Spin a free tier redshift cluster to read the data in the mart
 Steps to read data:
 - Create table
 ```
+--CREATE DATABASE carnext
+DROP TABLE IF EXISTS make_model_damage;
 CREATE TABLE IF NOT EXISTS make_model_damage (
-  build_year varchar(300),
+  build_year int,
   country varchar(300),
   make varchar(300),
-  model varchar(300),
-  avg_amount_damage decimal(10,2) 
+  model varchar(3000),
+  avg_amount_damage float 
+)
 )
 ```
 
 - Load Data from S3
 ```
-COPY public.make_model_damage FROM 's3://carnext-assignment2/part-00000-865e0cd9-98e7-4003-9d16-e52ec3cfc0f3-c000.snappy.parquet' CREDENTIALS 'aws_access_key_id=AKIA5IZR22OO3VADAW7R;aws_secret_access_key=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' CSV DELIMITER',';
+COPY public.make_model_damage (build_year,country,make,model,avg_amount_damage) 
+FROM 's3://carnext-assignment2/part-00000-882bbbc0-30ba-469f-86e9-aeecf47a2f27-c000.csv' 
+CREDENTIALS 'aws_access_key_id=AKIA5IZR22OO3VADAW7R;aws_secret_access_key=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' 
+CSV
+DELIMITER ','
+IGNOREHEADER 1;
 ```
 
 - Create VIEW/Datamart to view top 10 make-model with high damages
 ```
+DROP VIEW make_model_damage_top10_2016;
+
 CREATE OR REPLACE VIEW make_model_damage_top10_2016 AS 
 SELECT * FROM 
 (SELECT build_year,
@@ -66,8 +76,8 @@ SELECT * FROM
  make,
  model,
  avg_amount_damage,
- row_number() over (partition by country order by avg_amount_damage desc) as damage_rank
- FROM make_model_damage
-)ranks where build_year='2016' and damage_rank<=10;
+ row_number() over (partition by country order by avg_amount_damage desc) as damage_rank_in_year_country
+ FROM (Select * FROM make_model_damage where build_year='2016')t1
+)t2 where damage_rank_in_year_country<=10;
 
 ```

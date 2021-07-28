@@ -66,7 +66,8 @@ def clean_strings(df,cols):
     #Function to convert string columns to lower case and remove extra whitespaces
     def remove_extra_whitespaces(str1):
         if str1 is not None:
-            str1=str1.strip()
+            str1=str1.strip().replace('.',' ')
+
             return "".join(str1.split(' '))
         else:
             return str1
@@ -74,14 +75,16 @@ def clean_strings(df,cols):
     convertUDF = F.udf(lambda z: remove_extra_whitespaces(z), StringType())
     for col in cols:
         df=df.withColumn(col,F.lower(convertUDF(F.col(col))))
+        df=df.withColumn(col,F.regexp_replace(F.col(col),'[^A-Za-z0-9\\s+]+',''))
     return df
 
 def calulate_avg_damage(spark,df,curated_path=''):
     df=df.withColumn('amount_damage',df['amount_damage'].cast(DoubleType()))
+    df=df.fillna({'amount_damage':0})
     window=Window.partitionBy('country').orderBy(F.desc('avg_amount_damage'))
     df=df.groupBy(df.build_year,df.country,df.make,df.model).agg(F.avg(df.amount_damage).alias('avg_amount_damage'))
     # df = df.select(F.col('*'), F.row_number().over(window).alias('row_number')).where(F.col('row_number') <= 10)
-    df.printSchema()
+    df.show()
     return df
 
 

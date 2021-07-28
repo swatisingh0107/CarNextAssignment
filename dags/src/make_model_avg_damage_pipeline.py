@@ -1,5 +1,5 @@
 from src.utils.spark_utils import get_aws_spark_session
-
+from pyspark.sql.types import IntegerType
 from src.utils.functions import write_df_to_paruqet, get_data_csv, deduplicate_data, \
     clean_records_with_nulls, clean_strings, calulate_avg_damage, write_to_csv
 
@@ -20,8 +20,11 @@ def run_app(app_name):
         #Apply cleaning functions to dataframe
         cleaned_df = deduplicate_data(spark,raw_df)
         cleaned_df = clean_records_with_nulls(spark,20,cleaned_df)
-        cleaned_df = cleaned_df.filter(cleaned_df.make.isNotNull()).filter(cleaned_df.model.isNotNull())
         cleaned_df = clean_strings(cleaned_df,['make','model'])
+        cleaned_df = cleaned_df.filter(cleaned_df.make!='').filter(cleaned_df.model!='').filter(cleaned_df.build_year!='')
+        cleaned_df=cleaned_df.withColumn('build_year',cleaned_df['build_year'].cast(IntegerType()))
+        cleaned_df=cleaned_df.filter(cleaned_df.build_year>=1990)
+        print("Records in cleaned df:"+str(cleaned_df.count()))
         write_df_to_paruqet(cleaned_df, cleansed_path)
 
     elif app_name=='write_data':
@@ -30,7 +33,7 @@ def run_app(app_name):
         cleaned_df=spark.read.parquet(cleansed_path)
         result=calulate_avg_damage(spark,cleaned_df)
         write_to_csv(result,s3_path)
-        # write_to_db(result)
+        # result.show()
 
 
 import argparse
