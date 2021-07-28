@@ -4,7 +4,7 @@ import subprocess
 
 # from pyspark.sql.functions import input_file_name
 import pyspark.sql.functions as F
-from pyspark.sql.types import StringType
+from pyspark.sql.types import StringType,DoubleType
 import wget
 from pyspark.sql import Window
 
@@ -88,6 +88,7 @@ def clean_strings(df,cols):
     return df
 
 def calulate_avg_damage(spark,df,curated_path=''):
+    df=df.withColumn('amount_damage',df['amount_damage'].cast(DoubleType()))
     window=Window.partitionBy('country').orderBy(F.desc('avg_amount_damage'))
     df=df.groupBy(df.build_year,df.country,df.make,df.model).agg(F.avg(df.amount_damage).alias('avg_amount_damage'))
     # df = df.select(F.col('*'), F.row_number().over(window).alias('row_number')).where(F.col('row_number') <= 10)
@@ -96,14 +97,23 @@ def calulate_avg_damage(spark,df,curated_path=''):
     # df.repartition(1).write.parquet(curated_path, mode='overwrite')
     # print('Wrote to S3 bucket')
 
+def write_to_csv(df,path):
+    df.repartition(1).write.csv(path,header=True,sep=',')
 
 def write_to_db(result):
+    url='jdbc:redshift//carnext.cxrqdodkuag3.us-east-2.redshift.amazonaws.com:5439/carnext?user=admin&password=HybxWGtsBMuOYQlhcA1UjuHEOAZDLVMxpWvLIUGH'
     connectionProperties = {
     "user" : 'admin',
-    "password" : 'AKIA5IZR22OOTKYBL7HM',
+    "password" : 'HybxWGtsBMuOYQlhcA1UjuHEOAZDLVMxpWvLIUGH',
     "driver": 'com.mysql.jdbc.Driver'}
-    result.write.jdbc(url='jdbc:mysql://carnext.c7wgsmxotnws.us-east-2.rds.amazonaws.com:3306',
-          table='make_model_damage',properties=connectionProperties,mode='overwrite')
+    # result.coalesce(10).write.format('jdbc').option('url',url)\
+    #     .option('dbtable','make_model_damage')\
+    #     .option('driver' ,'com.mysql.jdbc.Driver')\
+    #     .option('user','admin')\
+    #     .option('password','HybxWGtsBMuOYQlhcA1UjuHEOAZDLVMxpWvLIUGH')\
+    #     .option('truncate','true').option("numPartitions", 8)\
+    #     .mode('overwrite').save()
+    result.write.mode('overwrite').option('driver','com.amazon.redshift.jdbc4.Driver').jdbc(url=url,table='public.make_model_damage')
 
 
 

@@ -1,7 +1,7 @@
 from utils.spark_utils import get_aws_spark_session
 
 from src.utils.functions import write_df_to_paruqet, write_to_db, get_data_csv, deduplicate_data, \
-    clean_records_with_nulls, clean_strings, calulate_avg_damage
+    clean_records_with_nulls, clean_strings, calulate_avg_damage, write_to_csv
 
 urlpath = 'https://s3-eu-west-1.amazonaws.com/carnext-data-engineering-assignment/test_data/'
 hadoop_dir = '/hdfs/carnext-data-engineering-assignment/raw/test_data/'
@@ -26,11 +26,11 @@ def run_app(app_name):
 
     elif app_name=='write_data':
         #Write aggregated output
-        # s3_path='s3a://carnext-assignment-curated/make_model_damage_amount/{0}'.format(striped_filename)
+        s3_path='s3a://carnext-assignment/agg_result'
         cleaned_df=spark.read.parquet(cleansed_path)
         result=calulate_avg_damage(spark,cleaned_df)
-        result = spark.read.parquet(cleansed_path)
-        write_to_db(result)
+        write_df_to_paruqet(result,s3_path)
+        # write_to_db(result)
 
 
 import argparse
@@ -39,3 +39,4 @@ parser.add_argument("app_name", help= "Name of the app to execute" )
 args=parser.parse_args()
 
 run_app(args.app_name)
+

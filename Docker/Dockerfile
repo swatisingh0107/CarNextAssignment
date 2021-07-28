@@ -81,7 +81,7 @@ RUN curl -sL \
 RUN echo $pwd
 #Add JDBC Driver
 
-RUN wget "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.11/mysql-connector-java-8.0.11-sources.jar" -O $SPARK_HOME/jars/mysql-connector-java-8.0.11.jar
+#RUN wget "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.11/mysql-connector-java-8.0.11-sources.jar" -O $SPARK_HOME/jars/mysql-connector-java-8.0.11.jar
 #&& unzip tmp/mysql-connector-java-commercial-5.1.7-bin.jar.zip -d $SPARK_HOME/jars \
 #&& rm tmp/mysql-connector-java-commercial-5.1.7-bin.jar.zip
 
