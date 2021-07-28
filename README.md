@@ -6,7 +6,7 @@ This repository contains four major components
 3. Driver Management
 4. AWS Config Management
 
-##**Instructions to run this project**
+##Instructions to run this project  
 ####Prerequisites:
 - Git
 - Docker
