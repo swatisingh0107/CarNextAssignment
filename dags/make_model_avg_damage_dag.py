@@ -47,26 +47,26 @@ FLOW_END = DummyOperator(
         trigger_rule=TriggerRule.ONE_SUCCESS,
         dag=dag)
 
-# cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/tests/test_functions.py"
-# RUN_TESTS = BashOperator(
-#     task_id="RUN_TESTS",
-#     bash_command=cmd,
-#     dag=dag)
-#
-# cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/make_model_avg_damage_pipeline.py get_data"
-#
-# GET_DATA = BashOperator(
-#     task_id="GET_DATA",
-#     bash_command=cmd,
-#     dag=dag)
-#
-# cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/make_model_avg_damage_pipeline.py clean_data"
-#
-# CLEAN_DATA = BashOperator(
-#     task_id="CLEAN_DATA",
-#     bash_command=cmd,
-#     dag=dag)
-#
+cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/tests/test_functions.py"
+RUN_TESTS = BashOperator(
+    task_id="RUN_TESTS",
+    bash_command=cmd,
+    dag=dag)
+
+cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/make_model_avg_damage_pipeline.py get_data"
+
+GET_DATA = BashOperator(
+    task_id="GET_DATA",
+    bash_command=cmd,
+    dag=dag)
+
+cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/make_model_avg_damage_pipeline.py clean_data"
+
+CLEAN_DATA = BashOperator(
+    task_id="CLEAN_DATA",
+    bash_command=cmd,
+    dag=dag)
+
 cmd = "cd /usr/local/airflow/dags/ && python /usr/local/airflow/dags/src/make_model_avg_damage_pipeline.py write_data"
 
 WRITE_DATA = BashOperator(
@@ -74,6 +74,5 @@ WRITE_DATA = BashOperator(
     bash_command=cmd,
     dag=dag)
 
-# FLOW_START >> RUN_TESTS>>GET_DATA>>CLEAN_DATA>>WRITE_DATA >> FLOW_END
+FLOW_START >> RUN_TESTS>>GET_DATA>>CLEAN_DATA>>WRITE_DATA >> FLOW_END
 
-FLOW_START >> WRITE_DATA >> FLOW_END

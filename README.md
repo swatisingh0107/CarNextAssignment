@@ -22,7 +22,7 @@ The docker image is built to setup the environment and airflow is deployed
 The pipeline DAG can be executed from the Airflow Webserver Interface
 
 ```
-http://localhost:8080/admin/airflow/tree?dag_id=avg_damage_vehicle_country
+http://localhost:8080/admin/
 ```
 
 Docker/Dockerfile builds Airflow, Java, Hadoop and Spark required to execute this project.
@@ -34,3 +34,4 @@ Edit the dags/utils/spark_utils file to add AWS Access Key and Secret
     
 ```
  
+Save the changes and trigger the dag from Airflow interface
