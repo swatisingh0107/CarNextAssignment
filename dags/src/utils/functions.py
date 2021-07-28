@@ -92,7 +92,7 @@ def write_to_csv(df,path):
     df.repartition(1).write.csv(path,header=True,sep=',',mode='overwrite')
 
 # def write_to_db(result):
-#     url='jdbc:redshift//carnext.cxrqdodkuag3.us-east-2.redshift.amazonaws.com:5439/carnext?user=admin&password=HybxWGtsBMuOYQlhcA1UjuHEOAZDLVMxpWvLIUGH'
+#     url='jdbc:redshift//carnext.cxrqdodkuag3.us-east-2.redshift.amazonaws.com:5439/carnext?user=admin&password=??'
 #     result.write.mode('overwrite').option('driver','com.amazon.redshift.jdbc4.Driver').jdbc(url=url,table='public.make_model_damage')
 
 
