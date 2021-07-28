@@ -11,4 +11,3 @@ def get_aws_spark_session(app_name):
 
 
 
-print(get_aws_spark_session('test'))

@@ -1,14 +1,11 @@
 import errno
 import os
 import subprocess
-
-# from pyspark.sql.functions import input_file_name
 import pyspark.sql.functions as F
 from pyspark.sql.types import StringType,DoubleType
 import wget
 from pyspark.sql import Window
 
-from src.utils.spark_utils import get_aws_spark_session
 
 
 def run_cmd(args_list):
@@ -31,7 +28,6 @@ def get_data_csv(path,output_dir,hadoop_dir):
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
-
     try:
         download=wget.download(path,output_dir)
         filename=download.split('/')[-1]
@@ -62,15 +58,12 @@ def clean_records_with_nulls(spark,null_threshhold,df):
     df=df.filter(df.numNulls<=null_threshhold)
     return df
 
-
-
-
 def write_df_to_paruqet(df,write_path):
     df.repartition(1).write.parquet(write_path, mode='overwrite')
     print('Wrote to cleansed bucket')
 
 def clean_strings(df,cols):
-
+    #Function to convert string columns to lower case and remove extra whitespaces
     def remove_extra_whitespaces(str1):
         if str1 is not None:
             str1=str1.strip()
@@ -78,13 +71,9 @@ def clean_strings(df,cols):
         else:
             return str1
 
-
     convertUDF = F.udf(lambda z: remove_extra_whitespaces(z), StringType())
     for col in cols:
         df=df.withColumn(col,F.lower(convertUDF(F.col(col))))
-
-
-
     return df
 
 def calulate_avg_damage(spark,df,curated_path=''):
@@ -94,26 +83,14 @@ def calulate_avg_damage(spark,df,curated_path=''):
     # df = df.select(F.col('*'), F.row_number().over(window).alias('row_number')).where(F.col('row_number') <= 10)
     df.printSchema()
     return df
-    # df.repartition(1).write.parquet(curated_path, mode='overwrite')
-    # print('Wrote to S3 bucket')
+
 
 def write_to_csv(df,path):
-    df.repartition(1).write.csv(path,header=True,sep=',')
+    df.repartition(1).write.csv(path,header=True,sep=',',mode='overwrite')
 
-def write_to_db(result):
-    url='jdbc:redshift//carnext.cxrqdodkuag3.us-east-2.redshift.amazonaws.com:5439/carnext?user=admin&password=HybxWGtsBMuOYQlhcA1UjuHEOAZDLVMxpWvLIUGH'
-    connectionProperties = {
-    "user" : 'admin',
-    "password" : 'HybxWGtsBMuOYQlhcA1UjuHEOAZDLVMxpWvLIUGH',
-    "driver": 'com.mysql.jdbc.Driver'}
-    # result.coalesce(10).write.format('jdbc').option('url',url)\
-    #     .option('dbtable','make_model_damage')\
-    #     .option('driver' ,'com.mysql.jdbc.Driver')\
-    #     .option('user','admin')\
-    #     .option('password','HybxWGtsBMuOYQlhcA1UjuHEOAZDLVMxpWvLIUGH')\
-    #     .option('truncate','true').option("numPartitions", 8)\
-    #     .mode('overwrite').save()
-    result.write.mode('overwrite').option('driver','com.amazon.redshift.jdbc4.Driver').jdbc(url=url,table='public.make_model_damage')
+# def write_to_db(result):
+#     url='jdbc:redshift//carnext.cxrqdodkuag3.us-east-2.redshift.amazonaws.com:5439/carnext?user=admin&password=HybxWGtsBMuOYQlhcA1UjuHEOAZDLVMxpWvLIUGH'
+#     result.write.mode('overwrite').option('driver','com.amazon.redshift.jdbc4.Driver').jdbc(url=url,table='public.make_model_damage')
 
 
 

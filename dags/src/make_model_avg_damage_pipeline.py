@@ -1,6 +1,6 @@
-from utils.spark_utils import get_aws_spark_session
+from src.utils.spark_utils import get_aws_spark_session
 
-from src.utils.functions import write_df_to_paruqet, write_to_db, get_data_csv, deduplicate_data, \
+from src.utils.functions import write_df_to_paruqet, get_data_csv, deduplicate_data, \
     clean_records_with_nulls, clean_strings, calulate_avg_damage, write_to_csv
 
 urlpath = 'https://s3-eu-west-1.amazonaws.com/carnext-data-engineering-assignment/test_data/'
@@ -29,7 +29,7 @@ def run_app(app_name):
         s3_path='s3a://carnext-assignment/agg_result'
         cleaned_df=spark.read.parquet(cleansed_path)
         result=calulate_avg_damage(spark,cleaned_df)
-        write_df_to_paruqet(result,s3_path)
+        write_to_csv(result,s3_path)
         # write_to_db(result)
 
 
