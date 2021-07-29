@@ -38,7 +38,7 @@ Save the changes and trigger the dag from Airflow interface
 
 The data is written to an S3 bucket which will serve as datalake for our datamart.
 
-Spin a free tier redshift cluster to read the data in the mart
+Spin a redshift cluster in the same region as s3 bucket to read the data in the mart
 
 Steps to read data:
 - Create table
